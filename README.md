@@ -9,7 +9,7 @@ Este repositorio contiene manejo de creacion de base de datos en SQL Server 2025
 3. Transact-SQL
 4. Lenguaje de Control de Datos (DCL)
 
-# Autor
+### Autor
 © Jaime Llanos
 
 Date: 16.11.2026
