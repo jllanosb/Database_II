@@ -260,3 +260,21 @@ CREATE TABLE RRHH.Persona (
 );
 print 'Tabla Persona Creada';
 go
+
+--Crear tabla Persona 
+if OBJECT_ID('RRHH.Cargo', 'U') is not null
+begin
+	Drop Table RRHH.Cargo;
+	print 'La tabla RRHH.Cargo Eliminada'; 
+end
+go
+
+CREATE TABLE RRHH.Cargo (
+	idcargo int identity(1,1),
+	nomcargo varchar(50) not null,
+	descripcion varchar(max),
+	salario_base decimal(10,2) not null,
+	constraint PK_cargo Primary key (idcargo)
+);
+print 'Tabla Cargo Creada';
+go
