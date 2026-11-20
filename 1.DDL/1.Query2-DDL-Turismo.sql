@@ -151,3 +151,112 @@ CREATE TABLE JLLB.Region (
 print 'Tabla Region Creada';
 go
 
+--Crear tabla subregion (Provincia)
+if OBJECT_ID('JLLB.SubRegion', 'U') is not null
+begin
+	Drop Table JLLB.SubRegion;
+	print 'La tabla JLLB.SubRegion Eliminada'; 
+end
+go
+
+CREATE TABLE jllb.Subregion (
+	idsubregion int identity(1,1),
+	nomsubregion nvarchar(100) not null,
+	codigo_ubigeo varchar(4) not null,
+	idregion int not null,
+	constraint PK_subregion primary key (idsubregion),
+	constraint FK_subregion_region
+	foreign key (idregion)
+	references jllb.region (idregion)
+);
+print 'Tabla Subregion creada';
+go
+
+--Crear tabla ciudad o distrito
+if OBJECT_ID('JLLB.ciudad', 'U') is not null
+begin
+	Drop Table JLLB.Ciudad;
+	print 'La tabla JLLB.Ciudad Eliminada'; 
+end
+go
+
+CREATE TABLE JLLB.Ciudad (
+	idciudad int identity(1,1),
+	nomciudad varchar(80) not null,
+	codigo_ubigeo varchar(6),
+	idsubregion int not null,
+	constraint PK_ciudad primary key (idciudad),
+	constraint FK_ciudad_subregion
+	foreign key (idsubregion)
+	References JLLB.Subregion (idsubregion)
+);
+print 'Tabla Ciudad creada';
+go
+
+--Crear tabla Tipo_documento
+if OBJECT_ID('RRHH.TipoDocumento', 'U') is not null
+begin
+	Drop Table RRHH.TipoDocumento;
+	print 'La tabla RRHH.TipoDocumento Eliminada'; 
+end
+go
+
+CREATE TABLE RRHH.TipoDocumento(
+	idtipodocumento int identity(1,1),
+	nombredoc varchar(50) not null,
+	abreviatura char(10) not null,
+	constraint PK_tipodocumento
+	primary key (idtipodocumento),
+	constraint UQ_nombredoc UNIQUE (nombredoc),
+	constraint UQ_abreviatura UNIQUE (abreviatura)
+);
+print 'Tabla TipoDocumento Creado';
+go
+
+--Crear tabla Persona 
+if OBJECT_ID('RRHH.Persona', 'U') is not null
+begin
+	Drop Table RRHH.Persona;
+	print 'La tabla RRHH.Persona Eliminada'; 
+end
+go
+
+CREATE TABLE RRHH.Persona (
+	idpersona int identity(1,1),
+	tipo_persona char(1) not null --N: Natural,J:Juridica
+	constraint CHK_tipo_persona
+	CHECK (tipo_persona in ('N', 'J')),
+	
+	nombres varchar(100),
+	apaterno varchar(100),
+	amaterno varchar(100),
+
+	razon_social varchar (200) not null,
+	nombre_comercial varchar(200),
+
+	idtipodocumento int not null,
+	numero_documento varchar(20) not null,
+	telefono varchar(20)
+	constraint CHK_numero_telefono
+	CHECK (LEN(Ltrim(RTRIM(telefono))) between 12 and 20
+	and telefono not like '%[^0-9+()]%'),
+	--+51987654321, (+51)987654321, (01) 654321
+	email varchar(150),
+	idnacionalidad int not null,
+	estado varchar(20) default 'Activo'
+	constraint CHK_estado
+	CHECK (estado in ('Activo', 'Inactivo')),
+
+	constraint PK_persona primary key (idpersona),
+	constraint UQ_persona_documento
+	UNIQUE (idtipodocumento, numero_documento),
+
+	constraint FK_Persona_tipodocumento
+	foreign key (idtipodocumento)
+	References RRHH.TipoDocumento (idtipodocumento),
+	constraint FK_persona_nacionalidad
+	foreign key (idnacionalidad)
+	References JLLB.Nacionalidad (idnacionalidad)
+);
+print 'Tabla Persona Creada';
+go
