@@ -316,7 +316,7 @@ CREATE TABLE JLLB.Direccion (
 print 'Tabla Direccion Creada';
 go
 
---Crear tabla Direccion 
+--Crear tabla Cliente 
 if OBJECT_ID('Ventas.Cliente', 'U') is not null
 begin
 	Drop Table Ventas.Cliente;
@@ -402,4 +402,108 @@ CREATE TABLE Ventas.Direccion_Cliente (
 	foreign key (iddireccion) References jllb.Direccion (iddireccion)
 );
 print 'Tabla Direccion Cliente Creada';
+go
+
+--Crear tabla Direccion_Empleado 
+if OBJECT_ID('RRHH.Direccion_Empleado', 'U') is not null
+begin
+	Drop Table RRHH.Direccion_Empleado;
+	print 'La tabla RRHH.Direccion_Empleado Eliminada'; 
+end
+go
+
+CREATE TABLE RRHH.Direccion_Empleado (
+	idpersona int not null,
+	iddireccion int not null,
+	tipo_direccion varchar(20) not null,
+	constraint CHK_tipo_direccion_empleado
+	CHECK (tipo_direccion in ('Casa', 'Trabajo')),
+	es_principal bit not null default 0,
+	estado_direccion varchar(20) not null default 'Activo',
+	fecha_registro datetime default getdate(),
+	constraint CHK_Estado_Direccion_Empleado
+	CHECK (estado_direccion in ('Activo', 'Inactivo', 'Suspendido')),
+	constraint PK_direccion_empleado
+	primary key (idpersona, iddireccion),
+	constraint FK_direccion_empleado_persona
+	foreign key (idpersona) References RRHH.Persona (idpersona),
+	constraint FK_direccion_empleado
+	foreign key (iddireccion) References jllb.Direccion (iddireccion)
+);
+print 'Tabla Direccion Empleado Creada';
+go
+
+--Crear tabla Categoria_Proveedor
+if OBJECT_ID('Compras.Categoria_Proveedor', 'U') is not null
+begin
+	Drop Table Compras.Categoria_Proveedor;
+	print 'La tabla Compras.Categoria_Proveedor Eliminada'; 
+end
+go
+
+CREATE TABLE Compras.Categoria_Proveedor (
+	idcat_proveedor int identity (1,1),
+	nomcat_proveedor varchar(60) not null,
+	descripcion varchar(max),
+	fecha_registro datetime default getdate(),
+	constraint PK_cat_proveedor primary key (idcat_proveedor),
+	constraint UQ_nombre_cat_proveedor  UNIQUE (nomcat_proveedor)
+);
+print 'Tabla Categoria Provedoor Creada';
+go
+
+--Crear tabla Proveedor
+if OBJECT_ID('Compras.Proveedor', 'U') is not null
+begin
+	Drop Table Compras.Proveedor;
+	print 'La tabla Compras.Proveedor Eliminada'; 
+end
+go
+
+CREATE TABLE Compras.Proveedor (
+	idpersona int not null,
+	cod_proveedor varchar(15) null,
+	fecha_inicio_relacion date not null,
+	fecha_fin_relacion date null,
+	sitio_web nvarchar(250) null,
+	requiere_contrato bit not null default 0,
+	estado_proveedor varchar(20) not null default 'Activo',
+	observaciones nvarchar(max) null,
+	fecha_registro datetime default getdate(),
+	constraint PK_proveedor primary key (idpersona),
+	constraint CHK_Estado_Proveedor
+	CHECK (estado_proveedor in ('Activo', 'Inactivo', 'Suspendido')),
+	constraint FK_proveedor_persona
+	foreign key (idpersona) References RRHH.Persona(idpersona)
+);
+print 'Tabla Proveedor Creada';
+go
+
+--Crear tabla Direccion_Proveedor 
+if OBJECT_ID('Compras.Direccion_Proveedor', 'U') is not null
+begin
+	Drop Table Compras.Direccion_Proveedor;
+	print 'La tabla Compras.Direccion_Proveedor Eliminada'; 
+end
+go
+
+CREATE TABLE Compras.Direccion_Proveedor (
+	idpersona int not null,
+	iddireccion int not null,
+	tipo_direccion varchar(20) not null,
+	constraint CHK_tipo_direccion_proveedor
+	CHECK (tipo_direccion in ('Fiscal', 'Envio', 'Fisica', 'Atencion', 'Pago', 'Sucursal', 'Almacen', 'Operativa')),
+	es_principal bit not null default 0,
+	estado_proveedor varchar(20) not null default 'Activo',
+	fecha_registro datetime default getdate(),
+	constraint CHK_Estado_Direccion_Proveedor
+	CHECK (estado_proveedor in ('Activo', 'Inactivo', 'Suspendido')),
+	constraint PK_direccion_proveedor
+	primary key (idpersona, iddireccion),
+	constraint FK_direccion_empleado_persona
+	foreign key (idpersona) References RRHH.Persona (idpersona),
+	constraint FK_direccion_empleado
+	foreign key (iddireccion) References jllb.Direccion (iddireccion)
+);
+print 'Tabla Direccion Proveedor Creada';
 go
