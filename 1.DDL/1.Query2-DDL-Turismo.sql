@@ -82,6 +82,17 @@ begin
 	print 'Esquema JLLB existe';
 end;
 go
+
+if SCHEMA_ID(N'Hospedaje') is null
+begin
+	EXEC (N'Create Schema Hospedaje Authorization dbo;');
+	print 'Esquema Hospedaje Creado';
+end 
+else
+begin
+	print 'Esquema Hospedaje existe';
+end;
+go
 /*
 Creacion de Tablas
 -- Validar Existencia
@@ -506,4 +517,118 @@ CREATE TABLE Compras.Direccion_Proveedor (
 	foreign key (iddireccion) References jllb.Direccion (iddireccion)
 );
 print 'Tabla Direccion Proveedor Creada';
+go
+
+--Crear tabla Tipo_Alojamiento
+if OBJECT_ID('Hospedaje.Tipo_Alojamiento', 'U') is not null
+begin
+	Drop Table Hospedaje.Tipo_Alojamiento;
+	print 'La tabla Hospedaje.Tipo_Alojamiento Eliminada'; 
+end
+go
+
+CREATE TABLE Hospedaje.Tipo_Alojamiento (
+	idtipoalojamiento int identity(1,1),
+	nombre_tipo varchar(50) not null, --Hotel, Casa de Campo, Hostal, 'Cabaña'
+	descripcion nvarchar(max) null,
+	icono_url varchar(255) null,
+	fecha_registro datetime default getdate(),
+	constraint PK_tipo_alojamiento primary key (idtipoalojamiento),
+	constraint UQ_nombre_tipo_aloj
+	UNIQUE (nombre_tipo)
+);
+print 'Tabla Tipo_Alojamiento Creado';
+go
+
+--Crear tabla Alojamiento
+if OBJECT_ID('Hospedaje.Alojamiento', 'U') is not null
+begin
+	Drop Table Hospedaje.Alojamiento;
+	print 'La tabla Hospedaje.Alojamiento Eliminada'; 
+end
+go
+
+CREATE TABLE Hospedaje.Alojamiento (
+	idalojamiento int identity(1,1),
+	constraint PK_alojamiento primary key (idalojamiento),
+	idtipoalojamiento int not null,
+	constraint FK_tipoalojamiento
+	foreign key (idtipoalojamiento) references Hospedaje.Tipo_alojamiento (idtipoalojamiento),
+	nombre varchar(100) not null,
+	telefono varchar(20),
+	correo varchar(100),
+	Categoria_Estrellas tinyint,
+	fecha_registro datetime default getdate(),
+	constraint CHK_categoria_estrellas
+	check (categoria_estrellas between 1 and 5) --Aplica solo a hoteles
+);
+print 'Tabla Alojamiento Creada';
+go
+
+--Crear tabla Direccion_Alojamiento
+if OBJECT_ID('Hospedaje.Direccion_Alojamiento', 'U') is not null
+begin
+	Drop Table Hospedaje.Direccion_Alojamiento;
+	print 'La tabla Hospedaje.Direccion_Alojamiento Eliminada'; 
+end
+go
+
+CREATE TABLE Hospedaje.Direccion_Alojamiento (
+	idalojamiento int not null,
+	iddireccion int not null,
+	tipo_direccion varchar(20) not null default 'Fisica',
+	referencia varchar(max),
+	es_principal bit default 0,
+	fecha_registro datetime default getdate(),
+	constraint PK_dire_alojamiento
+	primary key(idalojamiento, iddireccion),
+	constraint FK_id_alojamiento 
+	foreign key (idalojamiento) references 
+	Hospedaje.Alojamiento (idalojamiento),
+	constraint FK_id_direccion 
+	foreign key (iddireccion) references jllb.Direccion(iddireccion)
+);
+print 'Tabla Direccion_Alojamiento creado';
+go
+
+--Crear tabla Proveedor_Alojamiento
+if OBJECT_ID('Hospedaje.Proveedor_Alojamiento', 'U') is not null
+begin
+	Drop Table Hospedaje.Proveedor_Alojamiento;
+	print 'La tabla Hospedaje.Proveedor_Alojamiento Eliminada'; 
+end
+go
+
+CREATE TABLE Hospedaje.Proveedor_Alojamiento (
+	idproveedoralojamiento int not null identity(1,1),
+	idpersona int not null,
+	idalojamiento int not null,
+	fecha_registro datetime default getdate(),
+	constraint PK_ProveedorAlojamiento primary key (idproveedoralojamiento),
+	constraint FK_idpersona_provee_alojamiento
+	foreign key (idpersona) references rrhh.persona (idpersona),
+	constraint FK_idalojmaiento_provee_alojamiento
+	foreign key (idalojamiento) references Hospedaje.alojamiento (idalojamiento)
+);
+print 'Tabla Proveedor_alojamiento creado';
+go
+
+--Crear tabla Tipo_Habitacion
+if OBJECT_ID('Hospedaje.Tipo_Habitacion', 'U') is not null
+begin
+	Drop Table Hospedaje.Tipo_Habitacion;
+	print 'La tabla Hospedaje.Tipo_Habitacion Eliminada'; 
+end
+go
+
+CREATE TABLE Hospedaje.Tipo_Habitacion (
+	idtipohabitacion int identity(1,1),
+	nombrehabitacion varchar(50) not null,
+	constraint PK_idtipohabitacion primary key (idtipohabitacion),
+	constraint UQ_nomhabitacion Unique(nombrehabitacion),
+	capacidad_persona int not null,
+	descripcion varchar(max),
+	fecha_registro datetime default getdate()
+);
+print 'Tabla Tipo_Habitacion creada';
 go
