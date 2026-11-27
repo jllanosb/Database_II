@@ -711,9 +711,87 @@ CREATE TABLE Lugar.Lugar_turistico (
 	horario_cierre time not null,
 	califacion decimal(3,2) default 0.00,
 	estado varchar(20) default 'Activo',
+	fecha_registro datetime default getdate(),
 	constraint pk_lugar_turistico primary key (idlugarturistico),
 	constraint CHK_estado_lugar
 	CHECK (estado in ('Activo', 'Inactivo', 'Temporalmente Cerrado'))
 );
 print 'Tabla Lugar_turistico creado';
+go
+
+--Crear tabla direccion_Lugar_turistico
+if OBJECT_ID('Lugar.Direccion_LugarTuristico', 'U') is not null
+begin
+	Drop Table Lugar.Direccion_LugarTuristico;
+	print 'La tabla Lugar.Direccion_LugarTuristico Eliminada'; 
+end
+go
+
+CREATE TABLE Lugar.Direccion_LugarTuristico (
+	idlugarturistico int not null,
+	iddireccion int not null,
+	tipo_direccion varchar(20) not null default 'Fisica',
+	Referencia varchar(max),
+	es_principal bit default 0,
+	fecha_registro datetime default getdate(),
+	constraint PK_dire_lugarturistico
+	primary key (idlugarturistico, iddireccion),
+	constraint FK_id_lugar_turistico
+	foreign key (idlugarturistico) references Lugar.Lugar_Turistico (idlugarturistico),
+	constraint FK_id_direccion_lugar_t
+	foreign key (iddireccion) references jllb.direccion(iddireccion)
+);
+PRINT 'Tabla Direccion_LugarTuristico creada';
+go
+
+--Crear tabla Tipo_Transporte
+if OBJECT_ID('Transporte.Tipo_Transporte', 'U') is not null
+begin
+	Drop Table Transporte.Tipo_Transporte;
+	print 'La tabla Transporte.Tipo_Transporte Eliminada'; 
+end
+go
+
+CREATE TABLE Transporte.Tipo_Transporte (
+	idtipotransporte int identity(1,1),
+	nombre varchar(50) not null,
+	descripcion varchar(max),
+	fecha_registro datetime default getdate(),
+	constraint PK_tipotransporte primary key (idtipotransporte),
+	constraint UQ_nombre_transporte UNIQUE (nombre)
+);
+PRINT 'Tabla Tipo_Transporte Creado';
+go
+
+--Crear tabla Vehiculo
+if OBJECT_ID('Transporte.Vehiculo', 'U') is not null
+begin
+	Drop Table Transporte.Vehiculo;
+	print 'La tabla Transporte.Vehiculo Eliminada'; 
+end
+go
+
+CREATE TABLE Transporte.Vehiculo (
+	idvehiculo int identity(1,1),
+	constraint PK_vehiculo primary key (idvehiculo),
+	idproveedor int not NULL,
+	constraint FK_vehiculo_proveedor
+	foreign key (idproveedor) references Compras.Proveedor (idpersona),
+	placa varchar(10) not null,
+	constraint UQ_placa UNIQUE (placa),
+	marca varchar(50),
+	modelo varchar(50),
+	capacidad_pasajeros int not null,
+	anio_fabricacion int not null
+	constraint CHK_anio_fabricacion
+	CHECK (anio_fabricacion between 2000 and YEAR(getdate())),
+	precio_km decimal(10,2),
+	precio_hora decimal (10,2),
+	precio_dia decimal (10,2),
+	estado_vehiculo varchar(20) default 'Disponible',
+	fecha_registro datetime default getdate(),
+	constraint CHK_estado_vechiculo
+	CHECK (estado_vehiculo in ('Disponible', 'En Servicio', 'En Mantenimiento','Fuera Servicio'))
+);
+print 'Tabla Vehiculo creado';
 go
